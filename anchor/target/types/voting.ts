@@ -149,6 +149,7 @@ export type Voting = {
         },
         {
           "name": "poll",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -187,6 +188,10 @@ export type Voting = {
         {
           "name": "pollId",
           "type": "u64"
+        },
+        {
+          "name": "voterId",
+          "type": "pubkey"
         }
       ]
     }
@@ -217,6 +222,13 @@ export type Voting = {
         153,
         111
       ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "alreadyVoted",
+      "msg": "The voter has already voted."
     }
   ],
   "types": [
@@ -260,6 +272,12 @@ export type Voting = {
           {
             "name": "candidateAmount",
             "type": "u64"
+          },
+          {
+            "name": "voters",
+            "type": {
+              "vec": "pubkey"
+            }
           }
         ]
       }

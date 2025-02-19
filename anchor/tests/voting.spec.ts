@@ -12,25 +12,28 @@ describe("Voting", () => {
   let votingProgram: anchor.Program<Voting>;
 
   beforeAll(async () => {
-    context = await startAnchor('', [{ name: "voting", programId: PROGRAM_ID }], []);
-    provider = new BankrunProvider(context);
-    votingProgram = new anchor.Program<Voting>(
-      IDL,
-      provider,
+    context = await startAnchor(
+      "",
+      [{ name: "voting", programId: PROGRAM_ID }],
+      []
     );
+    provider = new BankrunProvider(context);
+    votingProgram = new anchor.Program<Voting>(IDL, provider);
   });
 
   it("initializes a poll", async () => {
-    await votingProgram.methods.initializePoll(
-      new anchor.BN(1),
-      "What is your favorite color?",
-      new anchor.BN(100),
-      new anchor.BN(1739370789),
-    ).rpc();
+    await votingProgram.methods
+      .initializePoll(
+        new anchor.BN(1),
+        "What is your favorite color?",
+        new anchor.BN(100),
+        new anchor.BN(1739370789)
+      )
+      .rpc();
 
     const [pollAddress] = PublicKey.findProgramAddressSync(
       [new anchor.BN(1).toArrayLike(Buffer, "le", 8)],
-      votingProgram.programId,
+      votingProgram.programId
     );
 
     const poll = await votingProgram.account.poll.fetch(pollAddress);
@@ -43,64 +46,73 @@ describe("Voting", () => {
   });
 
   it("initializes candidates", async () => {
-    await votingProgram.methods.initializeCandidate(
-      "Pink",
-      new anchor.BN(1),
-    ).rpc();
-    await votingProgram.methods.initializeCandidate(
-      "Blue",
-      new anchor.BN(1),
-    ).rpc();
+    await votingProgram.methods
+      .initializeCandidate("Pink", new anchor.BN(1))
+      .rpc();
+    await votingProgram.methods
+      .initializeCandidate("Blue", new anchor.BN(1))
+      .rpc();
 
     const [pinkAddress] = PublicKey.findProgramAddressSync(
       [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Pink")],
-      votingProgram.programId,
+      votingProgram.programId
     );
-    const pinkCandidate = await votingProgram.account.candidate.fetch(pinkAddress);
+    const pinkCandidate = await votingProgram.account.candidate.fetch(
+      pinkAddress
+    );
     console.log(pinkCandidate);
     expect(pinkCandidate.candidateVotes.toNumber()).toBe(0);
     expect(pinkCandidate.candidateName).toBe("Pink");
 
     const [blueAddress] = PublicKey.findProgramAddressSync(
       [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Blue")],
-      votingProgram.programId,
+      votingProgram.programId
     );
-    const blueCandidate = await votingProgram.account.candidate.fetch(blueAddress);
+    const blueCandidate = await votingProgram.account.candidate.fetch(
+      blueAddress
+    );
     console.log(blueCandidate);
     expect(blueCandidate.candidateVotes.toNumber()).toBe(0);
     expect(blueCandidate.candidateName).toBe("Blue");
   });
 
   it("vote candidates", async () => {
-    await votingProgram.methods.vote(
-      "Pink",
-      new anchor.BN(1),
-    ).rpc();
-    await votingProgram.methods.vote(
-      "Blue",
-      new anchor.BN(1),
-    ).rpc();
-    await votingProgram.methods.vote(
-      "Pink",
-      new anchor.BN(1),
-    ).rpc();
-
-    const [pinkAddress] = PublicKey.findProgramAddressSync(
-      [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Pink")],
-      votingProgram.programId,
-    );
-    const pinkCandidate = await votingProgram.account.candidate.fetch(pinkAddress);
-    console.log(pinkCandidate);
-    expect(pinkCandidate.candidateVotes.toNumber()).toBe(2);
-    expect(pinkCandidate.candidateName).toBe("Pink");
+    const provider = anchor.AnchorProvider.local();
+    anchor.setProvider(provider);
+    let voterId = provider.wallet.publicKey;
+    await votingProgram.methods.vote("Blue", new anchor.BN(1), voterId).rpc();
 
     const [blueAddress] = PublicKey.findProgramAddressSync(
       [new anchor.BN(1).toArrayLike(Buffer, "le", 8), Buffer.from("Blue")],
-      votingProgram.programId,
+      votingProgram.programId
     );
-    const blueCandidate = await votingProgram.account.candidate.fetch(blueAddress);
+    const blueCandidate = await votingProgram.account.candidate.fetch(
+      blueAddress
+    );
     console.log(blueCandidate);
     expect(blueCandidate.candidateVotes.toNumber()).toBe(1);
     expect(blueCandidate.candidateName).toBe("Blue");
+  });
+  it("prevents double voting by the same user", async () => {
+    const provider = anchor.AnchorProvider.local();
+    anchor.setProvider(provider);
+    const candidateName = "Pink";
+    const pollId = new anchor.BN(1);
+    const voterId = provider.wallet.publicKey;
+
+    // Cast the first vote
+    await votingProgram.methods.vote(candidateName, pollId, voterId).rpc();
+
+    // Attempt to cast a second vote
+    try {
+      await votingProgram.methods.vote(candidateName, pollId, voterId).rpc();
+      throw new Error("Double voting was allowed");
+    } catch (err) {
+      if (err instanceof anchor.AnchorError) {
+        expect(err.error.errorMessage).toContain("Voter has already voted");
+      } else {
+        throw err;
+      }
+    }
   });
 });

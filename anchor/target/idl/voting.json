@@ -1,5 +1,5 @@
 {
-  "address": "coUnmi3oBUtwtd9fjeAvSsJssXh5A5xyPbhpewyzRVF",
+  "address": "5DVPyvYHrEFf14z6hSZgLjWQCMpVTvGpnKzN5kFoqREC",
   "metadata": {
     "name": "voting",
     "version": "0.1.0",
@@ -143,6 +143,7 @@
         },
         {
           "name": "poll",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -181,6 +182,10 @@
         {
           "name": "_poll_id",
           "type": "u64"
+        },
+        {
+          "name": "voter_id",
+          "type": "pubkey"
         }
       ]
     }
@@ -211,6 +216,13 @@
         153,
         111
       ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "AlreadyVoted",
+      "msg": "The voter has already voted."
     }
   ],
   "types": [
@@ -254,6 +266,12 @@
           {
             "name": "candidate_amount",
             "type": "u64"
+          },
+          {
+            "name": "voters",
+            "type": {
+              "vec": "pubkey"
+            }
           }
         ]
       }
