@@ -34,8 +34,17 @@ pub mod voting {
     }
 
     pub fn vote(ctx: Context<Vote>, _candidate_name: String, _poll_id: u64) -> Result<()> {
+        let voter = &mut ctx.accounts.voter;
+
+        if voter.is_initialized && voter.has_voted{
+          return Err(error!(ErrorCode::AlreadyVoted));
+        }
+
         let candidate = &mut ctx.accounts.candidate;
         candidate.candidate_votes += 1;
+
+        voter.has_voted = true;
+        voter.is_initialized = true;
 
         msg!("Voted for candidate: {}", candidate.candidate_name);
         msg!("Votes: {}", candidate.candidate_votes);
@@ -62,6 +71,16 @@ pub struct Vote<'info> {
       bump
     )]
     pub candidate: Account<'info, Candidate>,
+
+    #[account(
+      init_if_needed,
+      payer = signer,
+      space = 8 + std::mem::size_of::<Voter>(),
+      seeds = [b"voter", signer.key().as_ref(), poll_id.to_le_bytes().as_ref()],
+      bump
+    )]
+
+    pub voter: Account<'info, Voter>,
 
     pub system_program: Program<'info, System>,
 }
@@ -124,4 +143,16 @@ pub struct Poll {
     pub poll_start: u64,
     pub poll_end: u64,
     pub candidate_amount: u64,
+}
+
+#[account]
+pub struct Voter {
+    pub has_voted: bool,
+    pub is_initialized: bool, // to prevent re-initialization
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("You have already voted in this poll")]
+    AlreadyVoted,
 }

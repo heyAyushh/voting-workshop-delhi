@@ -1,5 +1,5 @@
 {
-  "address": "coUnmi3oBUtwtd9fjeAvSsJssXh5A5xyPbhpewyzRVF",
+  "address": "4eAwyS2LkwTAd6c4NiGPm6Jqp6UdFzmvLhQsTJnZXofr",
   "metadata": {
     "name": "voting",
     "version": "0.1.0",
@@ -169,6 +169,32 @@
           }
         },
         {
+          "name": "voter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  111,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              },
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              }
+            ]
+          }
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
@@ -211,6 +237,26 @@
         153,
         111
       ]
+    },
+    {
+      "name": "Voter",
+      "discriminator": [
+        241,
+        93,
+        35,
+        191,
+        254,
+        147,
+        17,
+        202
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "AlreadyVoted",
+      "msg": "You have already voted in this poll"
     }
   ],
   "types": [
@@ -254,6 +300,22 @@
           {
             "name": "candidate_amount",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Voter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "has_voted",
+            "type": "bool"
+          },
+          {
+            "name": "is_initialized",
+            "type": "bool"
           }
         ]
       }
