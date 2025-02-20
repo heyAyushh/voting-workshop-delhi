@@ -20,8 +20,8 @@ export function Chat() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const userMessage: ChatMessage = { role: "user", content: input };
+    setMessages((prev: ChatMessage[]) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
 
@@ -38,19 +38,18 @@ export function Chat() {
       if (!response.ok) throw new Error("Failed to get response");
 
       const data = await response.json();
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.response },
-      ]);
+      const assistantMessage: ChatMessage = {
+        role: "assistant",
+        content: data.response,
+      };
+      setMessages((prev: ChatMessage[]) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Error:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Sorry, there was an error processing your request.",
-        },
-      ]);
+      const errorMessage: ChatMessage = {
+        role: "assistant",
+        content: "Sorry, there was an error processing your request.",
+      };
+      setMessages((prev: ChatMessage[]) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
