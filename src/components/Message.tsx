@@ -1,23 +1,21 @@
 "use client";
 
 import ReactMarkdown from "react-markdown";
-import { Components } from "react-markdown/lib/ast-to-react";
+import type { Components } from "react-markdown";
+import { ComponentPropsWithoutRef } from "react";
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
 
-interface CodeProps {
-  node: any;
-  inline: boolean;
-  className: string;
-  children: React.ReactNode[];
-}
+type CodeComponentProps = ComponentPropsWithoutRef<"code"> & {
+  inline?: boolean;
+};
 
 export function Message({ role, content }: ChatMessage) {
   const components: Components = {
-    code: ({ inline, className, children, ...props }: CodeProps) => {
+    code({ inline, className, children, ...props }: CodeComponentProps) {
       return (
         <code
           className={`font-sans ${className ?? ""} ${
