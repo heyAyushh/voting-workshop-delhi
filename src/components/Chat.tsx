@@ -1,0 +1,124 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { Message } from "./Message";
+
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export function Chat() {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const wallet = useWallet();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          wallet: wallet.publicKey?.toBase58(),
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to get response");
+
+      const data = await response.json();
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.response },
+      ]);
+    } catch (error) {
+      console.error("Error:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Sorry, there was an error processing your request.",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="btn btn-circle btn-primary fixed bottom-8 right-8 z-50 shadow-lg"
+      >
+        {isOpen ? "×" : "?"}
+      </button>
+
+      <div
+        className={`fixed bottom-24 right-8 w-96 transition-all duration-300 transform ${
+          isOpen
+            ? "translate-y-0 opacity-100"
+            : "translate-y-4 opacity-0 pointer-events-none"
+        } z-40`}
+      >
+        <div className="card bg-base-200 shadow-xl">
+          <div className="card-body p-0">
+            <div className="h-[400px] overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent">
+              {messages.length === 0 && (
+                <div className="text-center text-base-content/60">
+                  Ask me anything about the voting dApp!
+                </div>
+              )}
+              {messages.map((message, index) => (
+                <Message
+                  key={index}
+                  role={message.role}
+                  content={message.content}
+                />
+              ))}
+              {isLoading && (
+                <div className="flex items-center justify-center space-x-2">
+                  <span className="loading loading-dots loading-sm"></span>
+                  <div className="text-base-content/60">Thinking...</div>
+                </div>
+              )}
+            </div>
+            <form
+              onSubmit={handleSubmit}
+              className="border-t border-base-300 p-4 bg-base-200"
+            >
+              <div className="join w-full shadow-sm">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask about voting or Solana..."
+                  className="input join-item w-full bg-base-100 border-base-300"
+                  disabled={isLoading}
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="btn join-item btn-primary"
+                >
+                  Send
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
