@@ -9,16 +9,7 @@
   "instructions": [
     {
       "name": "initialize_candidate",
-      "discriminator": [
-        210,
-        107,
-        118,
-        204,
-        255,
-        97,
-        112,
-        26
-      ],
+      "discriminator": [210, 107, 118, 204, 255, 97, 112, 26],
       "accounts": [
         {
           "name": "signer",
@@ -71,16 +62,7 @@
     },
     {
       "name": "initialize_poll",
-      "discriminator": [
-        193,
-        22,
-        99,
-        197,
-        18,
-        33,
-        115,
-        117
-      ],
+      "discriminator": [193, 22, 99, 197, 18, 33, 115, 117],
       "accounts": [
         {
           "name": "signer",
@@ -125,16 +107,7 @@
     },
     {
       "name": "vote",
-      "discriminator": [
-        227,
-        110,
-        155,
-        23,
-        136,
-        126,
-        172,
-        25
-      ],
+      "discriminator": [227, 110, 155, 23, 136, 126, 172, 25],
       "accounts": [
         {
           "name": "signer",
@@ -188,29 +161,11 @@
   "accounts": [
     {
       "name": "Candidate",
-      "discriminator": [
-        86,
-        69,
-        250,
-        96,
-        193,
-        10,
-        222,
-        123
-      ]
+      "discriminator": [86, 69, 250, 96, 193, 10, 222, 123]
     },
     {
       "name": "Poll",
-      "discriminator": [
-        110,
-        234,
-        167,
-        188,
-        231,
-        136,
-        153,
-        111
-      ]
+      "discriminator": [110, 234, 167, 188, 231, 136, 153, 111]
     }
   ],
   "types": [

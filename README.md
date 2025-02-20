@@ -1,8 +1,9 @@
 # voting
 
-![Candidate ](./diagram.png) 
+![Candidate ](./diagram.png)
 
 ## Getting Started
+
 part 1- setup
 part 2- poll setup, initiliazepoll
 part 3- bankrun setup, write tests
@@ -11,9 +12,7 @@ part 5- vote, write tests
 
 part 6- challenge (https://bit.ly/solwa)
 
-Signup on - 
-    1. [Superteam Earn](https://earn.superteam.fun)
-    2. [Gib Work](https://app.gib.work)
+Signup on - 1. [Superteam Earn](https://earn.superteam.fun) 2. [Gib Work](https://app.gib.work)
 
 ### Prerequisites
 
