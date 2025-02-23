@@ -159,3 +159,4 @@ pub enum VotingError {
     #[msg("This address has already voted for this poll")]
     AlreadyVoted, // Error if the user tries to vote more than once
 }
+// attempted in the new branch
